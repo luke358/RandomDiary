@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:random_note/db/diary_repository.dart';
-import 'package:random_note/ui/diary_edit_page.dart';
 import 'package:random_note/ui/diary_list.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -65,14 +63,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final DiaryRepository diaryRepository = DiaryRepository();
 
-  void _incrementCounter() {
-    // 跳转到编辑页面
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => DiaryEditPage()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // diaryRepository.clearDatabase();
@@ -98,11 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: DiaryList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
       backgroundColor: Colors.blue,
     );
   }

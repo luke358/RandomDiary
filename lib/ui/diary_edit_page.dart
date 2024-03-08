@@ -8,7 +8,7 @@ import 'package:random_note/models/diary.dart';
 class DiaryEditPage extends StatefulWidget {
   final Diary? initialDiary; // 可选的参数
 
-  const DiaryEditPage({Key? key, this.initialDiary}) : super(key: key);
+  const DiaryEditPage({super.key, this.initialDiary});
 
   @override
   State<DiaryEditPage> createState() => _DiaryEditPageState();
@@ -39,7 +39,7 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
         title: Text('Edit Diary'),
         actions: [
           IconButton(
-            icon: Icon(Icons.save),
+            icon: const Icon(Icons.save),
             onPressed: () async {
               // Save the diary content
               String content =

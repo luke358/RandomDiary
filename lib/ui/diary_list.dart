@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:random_note/db/diary_repository.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
+import 'package:random_note/ui/diary_edit_page.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -35,6 +36,17 @@ class _DiaryListState extends State<DiaryList> {
     });
   }
 
+  void toAddDiaryPage() {
+    // 跳转到新增页面
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const DiaryEditPage()),
+    ).then((value) => {
+          // 重新加载数据
+          _initializeDatabaseAndLoadDiaries()
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,6 +62,11 @@ class _DiaryListState extends State<DiaryList> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: toAddDiaryPage,
+        tooltip: 'Add Diary',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
@@ -88,7 +105,11 @@ class DiaryListItem extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => DiaryDetailPage(diary: diary),
                     ),
-                  );
+                  ).then((value) => {
+                        context
+                            .findAncestorStateOfType<_DiaryListState>()!
+                            ._initializeDatabaseAndLoadDiaries()
+                      });
                 },
                 child: Ink(
                     color: Colors.white,
