@@ -40,26 +40,20 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
         actions: [
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () {
+            onPressed: () async {
               // Save the diary content
               String content =
                   jsonEncode(_controller.document.toDelta().toJson());
 
+              final Diary newDiary =
+                  Diary(content: content, date: DateTime.now());
               if (widget.initialDiary != null) {
-                diaryRepository.updateDiary(Diary(
-                  id: widget.initialDiary!.id,
-                  content: content,
-                  date: DateTime.now(),
-                ));
+                newDiary.id = widget.initialDiary!.id;
+                await diaryRepository.updateDiary(newDiary);
               } else {
-                diaryRepository.insertDiary(Diary(
-                  content: content,
-                  date: DateTime.now(),
-                ));
+                await diaryRepository.insertDiary(newDiary);
               }
-              Navigator.pop(context, content);
-
-              // Perform your save logic here
+              Navigator.pop(context, newDiary);
             },
           ),
         ],

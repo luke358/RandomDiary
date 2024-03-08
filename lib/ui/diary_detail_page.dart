@@ -1,17 +1,43 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:random_note/common/datetime_helpers.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:intl/intl.dart';
 import 'package:random_note/ui/diary_edit_page.dart';
 
-class DiaryDetailPage extends StatelessWidget {
-  final Diary diary;
+class DiaryDetailPage extends StatefulWidget {
+  final Diary diary; // 可选的参数
 
   DiaryDetailPage({required this.diary});
 
   @override
+  State<DiaryDetailPage> createState() => _DiaryDetailPageState();
+}
+
+class _DiaryDetailPageState extends State<DiaryDetailPage> {
+  late Diary diary;
+  late final QuillController _controller;
+
+  void updateDiary(Diary newDiary) {
+    diary = newDiary;
+    _controller.document = Document.fromJson(
+      jsonDecode(diary.content),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    diary = widget.diary;
+    _controller = QuillController(
+        document: Document.fromJson(jsonDecode(diary.content)),
+        selection: const TextSelection.collapsed(offset: 0));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    print(diary);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -63,7 +89,7 @@ class DiaryDetailPage extends StatelessWidget {
                         Expanded(
                           flex: 14,
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 7),
+                            padding: EdgeInsets.symmetric(horizontal: 6),
                             height: 80,
                             decoration: BoxDecoration(
                                 border: Border.all(
@@ -86,10 +112,14 @@ class DiaryDetailPage extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 20),
-                    Text(
-                      diary.content,
-                      style: TextStyle(fontSize: 16),
-                    )
+                    QuillEditor.basic(
+                      configurations: QuillEditorConfigurations(
+                        controller: _controller,
+                        padding: const EdgeInsets.all(16),
+                        readOnly: true,
+                        showCursor: false,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -118,17 +148,21 @@ class DiaryDetailPage extends StatelessWidget {
                   // ),
                   IconButton(
                     icon: Icon(Icons.edit),
-                    onPressed: () {
+                    onPressed: () async {
                       // 编辑按钮的操作
                       // 这里可以添加编辑逻辑
                       // 跳转到编辑页面
-                      Navigator.push(
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => DiaryEditPage(
                                   initialDiary: diary,
                                 )),
                       );
+
+                      setState(() {
+                        updateDiary(result);
+                      });
                     },
                   ),
                 ],
