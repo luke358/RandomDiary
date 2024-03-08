@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:random_note/db/diary_repository.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
@@ -49,25 +50,45 @@ class _DiaryListState extends State<DiaryList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[200], // 设置背景为灰色
-      body: ListView.builder(
-        itemCount: diaries.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            margin:
-                EdgeInsets.only(bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
-            color: Colors.white, // 设置日记项的背景为白色
-            child: DiaryListItem(diary: diaries[index]),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: toAddDiaryPage,
-        tooltip: 'Add Diary',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+    return Container(
+        child: SafeArea(
+            child: Scaffold(
+                backgroundColor: Colors.grey[200], // 设置背景为灰色
+                appBar: AppBar(
+                  toolbarHeight: 40,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0, // 去掉阴影效果
+                  title: Text(
+                    '二零二四年 三月',
+                    style: TextStyle(fontSize: 14.0),
+                  ),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () async {
+                        toAddDiaryPage();
+                      },
+                    ),
+                  ],
+                ),
+                body: ListView.builder(
+                  itemCount: diaries.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      margin: EdgeInsets.only(
+                          bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
+                      color: Colors.white, // 设置日记项的背景为白色
+                      child: DiaryListItem(diary: diaries[index]),
+                    );
+                  },
+                )
+                // ,
+                // floatingActionButton: FloatingActionButton(
+                //   onPressed: toAddDiaryPage,
+                //   tooltip: 'Add Diary',
+                //   child: const Icon(Icons.add),
+                // ), // This trailing comma makes auto-formatting nicer for build methods.
+                )));
   }
 }
 
