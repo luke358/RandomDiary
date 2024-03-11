@@ -10,7 +10,7 @@ import 'package:random_note/ui/diary_edit_page.dart';
 class DiaryDetailPage extends StatefulWidget {
   final Diary diary; // 可选的参数
 
-  DiaryDetailPage({required this.diary});
+  const DiaryDetailPage({super.key, required this.diary});
 
   @override
   State<DiaryDetailPage> createState() => _DiaryDetailPageState();
@@ -45,7 +45,8 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
             Expanded(
                 child: SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
+                padding:
+                    const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -55,29 +56,30 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
                         Expanded(
                           flex: 80,
                           child: Container(
-                            margin: EdgeInsets.only(right: 50.0),
+                            margin: const EdgeInsets.only(right: 50.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   diary.date.day.toString().padLeft(2, '0'),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 40,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   DateFormat('MMMM', 'zh_CN')
                                       .format(diary.date), // 获取月份并格式化为中文
-                                  style: TextStyle(letterSpacing: 7),
+                                  style: const TextStyle(letterSpacing: 7),
                                 ),
-                                Divider(color: Colors.black),
+                                const Divider(color: Colors.black),
                                 Text(
                                   '${DatetimeStringify(diary.date).yearString}年',
-                                  style: TextStyle(letterSpacing: 7),
+                                  style: const TextStyle(letterSpacing: 7),
                                 ),
                                 Container(
-                                  margin: EdgeInsets.only(top: 8), // 调整底部间距
-                                  child: Divider(
+                                  margin:
+                                      const EdgeInsets.only(top: 8), // 调整底部间距
+                                  child: const Divider(
                                     color: Colors.black,
                                     height: 1,
                                   ),
@@ -89,7 +91,7 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
                         Expanded(
                           flex: 14,
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                             height: 80,
                             decoration: BoxDecoration(
                                 border: Border.all(
@@ -100,18 +102,21 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
                               children: [
                                 Text(
                                   DateFormat('HH:mm').format(diary.date),
-                                  style: TextStyle(fontSize: 14, height: 1.5),
+                                  style: const TextStyle(
+                                      fontSize: 13, height: 1.5),
                                 ),
-                                Divider(color: Colors.black),
-                                Text(DateFormat('EEE', "zh_CN")
-                                    .format(diary.date)),
+                                const Divider(color: Colors.black),
+                                Text(
+                                  DateFormat('EEE', "zh_CN").format(diary.date),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
                               ],
                             ),
                           ),
                         )
                       ],
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     QuillEditor.basic(
                       configurations: QuillEditorConfigurations(
                         controller: _controller,
@@ -125,14 +130,14 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
               ),
             )),
             // 底部按钮
-            Container(
+            SizedBox(
               height: 50,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back),
                     onPressed: () {
                       // 返回按钮的操作
                       Navigator.pop(context);
@@ -147,7 +152,7 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
                   //   },
                   // ),
                   IconButton(
-                    icon: Icon(Icons.edit),
+                    icon: const Icon(Icons.edit),
                     onPressed: () async {
                       // 编辑按钮的操作
                       // 这里可以添加编辑逻辑

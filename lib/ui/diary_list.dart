@@ -1,40 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:random_note/db/diary_repository.dart';
+import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
 import 'package:random_note/ui/diary_edit_page.dart';
+import 'package:random_note/widgets/Loading.dart';
+import 'package:unicons/unicons.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: DiaryList(),
   ));
 }
 
 class DiaryList extends StatefulWidget {
+  const DiaryList({super.key});
+
   @override
   _DiaryListState createState() => _DiaryListState();
 }
 
 class _DiaryListState extends State<DiaryList> {
-  late DiaryRepository diaryRepository;
-  late List<Diary> diaries;
-
   @override
   void initState() {
     super.initState();
-    diaryRepository = DiaryRepository();
-    diaries = [];
-
-    // 初始化数据库并获取日记数据
-    _initializeDatabaseAndLoadDiaries();
-  }
-
-  Future<void> _initializeDatabaseAndLoadDiaries() async {
-    List<Diary> loadedDiaries = await diaryRepository.getAllDiaries();
-    setState(() {
-      diaries = loadedDiaries;
-    });
   }
 
   void toAddDiaryPage() {
@@ -42,10 +30,7 @@ class _DiaryListState extends State<DiaryList> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const DiaryEditPage()),
-    ).then((value) => {
-          // 重新加载数据
-          _initializeDatabaseAndLoadDiaries()
-        });
+    );
   }
 
   @override
@@ -58,7 +43,7 @@ class _DiaryListState extends State<DiaryList> {
                   toolbarHeight: 40,
                   backgroundColor: Colors.transparent,
                   elevation: 0, // 去掉阴影效果
-                  title: Text(
+                  title: const Text(
                     '二零二四年 三月',
                     style: TextStyle(fontSize: 14.0),
                   ),
@@ -71,24 +56,42 @@ class _DiaryListState extends State<DiaryList> {
                     ),
                   ],
                 ),
-                body: ListView.builder(
-                  itemCount: diaries.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      margin: EdgeInsets.only(
-                          bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
-                      color: Colors.white, // 设置日记项的背景为白色
-                      child: DiaryListItem(diary: diaries[index]),
-                    );
+                body: StreamBuilder(
+                  stream: diaryService.diaryStream,
+                  builder: (
+                    BuildContext context,
+                    AsyncSnapshot<List<Diary>> snapshot,
+                  ) {
+                    if (snapshot.hasError) {
+                      return Center(
+                          child: Text('Steam error: ${snapshot.error}'));
+                    }
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.none:
+                        return const Center(
+                            child: Icon(UniconsLine.data_sharing));
+                      case ConnectionState.waiting:
+                        return const Loading();
+                      case ConnectionState.active:
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Container(
+                              margin: const EdgeInsets.only(
+                                  bottom: 8.0,
+                                  left: 10.0,
+                                  right: 10.0), // 设置底部间距
+                              color: Colors.white, // 设置日记项的背景为白色
+                              child:
+                                  DiaryListItem(diary: snapshot.data![index]),
+                            );
+                          },
+                        );
+                      case ConnectionState.done:
+                        return const Center(child: Text('Stream closed'));
+                    }
                   },
-                )
-                // ,
-                // floatingActionButton: FloatingActionButton(
-                //   onPressed: toAddDiaryPage,
-                //   tooltip: 'Add Diary',
-                //   child: const Icon(Icons.add),
-                // ), // This trailing comma makes auto-formatting nicer for build methods.
-                )));
+                ))));
   }
 }
 
@@ -108,8 +111,8 @@ class DiaryListItem extends StatelessWidget {
         background: Container(
           color: Colors.red, // 滑动时显示的背景颜色
           alignment: Alignment.centerRight,
-          padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: Icon(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: const Icon(
             Icons.delete,
             color: Colors.white,
           ),
@@ -126,11 +129,7 @@ class DiaryListItem extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => DiaryDetailPage(diary: diary),
                     ),
-                  ).then((value) => {
-                        context
-                            .findAncestorStateOfType<_DiaryListState>()!
-                            ._initializeDatabaseAndLoadDiaries()
-                      });
+                  );
                 },
                 child: Ink(
                     color: Colors.white,
@@ -153,17 +152,17 @@ class DiaryListItem extends StatelessWidget {
                               children: [
                                 Text(
                                   '${diary.date.day}'.padLeft(2, '0'),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 15.0,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   '周${_getWeekday(diary.date.weekday)}',
-                                  style: TextStyle(fontSize: 10.0, height: 1.5),
+                                  style: const TextStyle(fontSize: 10.0, height: 1.5),
                                 ),
                                 Text(
                                   '${'${diary.date.hour}'.padLeft(2, '0')}:${'${diary.date.minute}'.padLeft(2, '0')}',
-                                  style: TextStyle(fontSize: 8.0),
+                                  style: const TextStyle(fontSize: 8.0),
                                 ),
                               ],
                             ),

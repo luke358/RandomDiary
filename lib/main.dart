@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:random_note/db/diary_repository.dart';
+import 'package:random_note/db/diary_service.dart';
 import 'package:random_note/ui/diary_list.dart';
 import 'package:intl/date_symbol_data_local.dart';
+
+final DiaryService diaryService = DiaryService();
 
 void main() async {
   await initializeDateFormatting('zh_CN', null);

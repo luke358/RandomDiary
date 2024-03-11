@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:random_note/db/diary_repository.dart';
+import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
 
 class DiaryEditPage extends StatefulWidget {
@@ -49,9 +50,9 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
                   Diary(content: content, date: DateTime.now());
               if (widget.initialDiary != null) {
                 newDiary.id = widget.initialDiary!.id;
-                await diaryRepository.updateDiary(newDiary);
+                await diaryService.updateDiary(newDiary);
               } else {
-                await diaryRepository.insertDiary(newDiary);
+                await diaryService.insertDiary(newDiary);
               }
               Navigator.pop(context, newDiary);
             },
