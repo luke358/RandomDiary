@@ -164,10 +164,11 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
                                   initialDiary: diary,
                                 )),
                       );
-
-                      setState(() {
-                        updateDiary(result);
-                      });
+                      if (result != null) {
+                        setState(() {
+                          updateDiary(result);
+                        });
+                      }
                     },
                   ),
                 ],

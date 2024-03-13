@@ -1,20 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+typedef OnSelected = Function(int index);
+
 class ScrollPicker extends StatefulWidget {
-  const ScrollPicker(
-      {super.key,
-      required this.list,
-      this.index,
-      this.type,
-      this.startDate,
-      this.endDate});
+  const ScrollPicker({
+    super.key,
+    required this.list,
+    this.index,
+    this.type,
+    this.startDate,
+    this.endDate,
+    this.onSelected,
+  });
 
   final int? index;
   final String? type;
   final List<String> list;
   final DateTime? startDate;
   final DateTime? endDate;
+  final OnSelected? onSelected;
   @override
   State<ScrollPicker> createState() => _ScrollPickerState();
 }
@@ -62,9 +67,12 @@ class _ScrollPickerState extends State<ScrollPicker> {
         looping: false,
         selectionOverlay: const Center(),
         onSelectedItemChanged: (index) {
-          setState(() {
-            index = index;
-          });
+          // setState(() {
+          //   index = index;
+          // });
+          if (widget.onSelected != null) {
+            widget.onSelected!(index);
+          }
           // updateMonthList();
           // updateDayList();
         },

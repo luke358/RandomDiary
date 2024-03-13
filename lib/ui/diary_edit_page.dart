@@ -63,7 +63,14 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
               showModalBottomSheet(
                 context: context,
                 builder: (BuildContext context) {
-                  return const DateTimePickerSheet();
+                  return DateTimePickerSheet(
+                    selectedDate: selectedDate,
+                    onSelected: (date) => {
+                      setState(() {
+                        selectedDate = date;
+                      })
+                    },
+                  );
                 },
               );
             },
