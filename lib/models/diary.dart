@@ -20,7 +20,6 @@ class Diary {
 
   String get plainText => document.toPlainText().replaceAll(RegExp(r'\n'), '');
 
-
   // 将日记对象转换为Map以便存储到数据库
   Map<String, dynamic> toMap() {
     return {
@@ -28,6 +27,10 @@ class Diary {
       'content': content,
       'date': date.toIso8601String(),
     };
+  }
+
+  String getYearMonth() {
+    return '${date.year}-${date.month}';
   }
 
   // 从Map中构建日记对象

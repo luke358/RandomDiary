@@ -1,10 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
 import 'package:random_note/ui/diary_edit_page.dart';
-import 'package:random_note/widgets/Loading.dart';
+import 'package:random_note/widgets/loading.dart';
 import 'package:unicons/unicons.dart';
+import 'package:collection/collection.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -33,6 +37,69 @@ class _DiaryListState extends State<DiaryList> {
     );
   }
 
+  Widget _getBodyBySnapshotState(
+    BuildContext context,
+    AsyncSnapshot<List<Diary>> snapshot,
+  ) {
+    if (snapshot.hasError) {
+      return Center(child: Text('Steam error: ${snapshot.error}'));
+    }
+    switch (snapshot.connectionState) {
+      case ConnectionState.none:
+        return const Center(child: Icon(UniconsLine.data_sharing));
+      case ConnectionState.waiting:
+        return const Loading();
+      case ConnectionState.active:
+        final diaries = snapshot.data!;
+        final sections = groupBy(diaries, (diary) => diary.getYearMonth());
+        final formattedSections = sections.entries.map((entry) {
+          final header = entry.key;
+
+          return _DiaryListViewSection(
+            header: header,
+            items: entry.value.toList(),
+          );
+        }).toList();
+        return ListView.builder(
+          itemCount: formattedSections.length,
+          itemBuilder: (BuildContext context, int index) {
+            final section = formattedSections[index];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '◆ ${section.header} ◆',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: Color.fromARGB(255, 191, 191, 191),
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  children: section.items
+                      .map((item) => Container(
+                            margin: const EdgeInsets.only(
+                                bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
+                            color: Colors.white, // 设置日记项的背景为白色
+                            child: DiaryListItem(diary: item),
+                          ))
+                      .toList(),
+                ),
+              ],
+            );
+          },
+        );
+      case ConnectionState.done:
+        return const Center(child: Text('Stream closed'));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -58,39 +125,7 @@ class _DiaryListState extends State<DiaryList> {
                 ),
                 body: StreamBuilder(
                   stream: diaryService.diaryStream,
-                  builder: (
-                    BuildContext context,
-                    AsyncSnapshot<List<Diary>> snapshot,
-                  ) {
-                    if (snapshot.hasError) {
-                      return Center(
-                          child: Text('Steam error: ${snapshot.error}'));
-                    }
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                        return const Center(
-                            child: Icon(UniconsLine.data_sharing));
-                      case ConnectionState.waiting:
-                        return const Loading();
-                      case ConnectionState.active:
-                        return ListView.builder(
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Container(
-                              margin: const EdgeInsets.only(
-                                  bottom: 8.0,
-                                  left: 10.0,
-                                  right: 10.0), // 设置底部间距
-                              color: Colors.white, // 设置日记项的背景为白色
-                              child:
-                                  DiaryListItem(diary: snapshot.data![index]),
-                            );
-                          },
-                        );
-                      case ConnectionState.done:
-                        return const Center(child: Text('Stream closed'));
-                    }
-                  },
+                  builder: _getBodyBySnapshotState,
                 ))));
   }
 }
@@ -98,7 +133,7 @@ class _DiaryListState extends State<DiaryList> {
 class DiaryListItem extends StatelessWidget {
   final Diary diary;
 
-  DiaryListItem({required this.diary});
+  const DiaryListItem({required this.diary});
 
   Future<bool> confirmDismiss(String text) async {
     return false;
@@ -157,8 +192,9 @@ class DiaryListItem extends StatelessWidget {
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  '周${_getWeekday(diary.date.weekday)}',
-                                  style: const TextStyle(fontSize: 10.0, height: 1.5),
+                                  DateFormat('EEE', "zh_CN").format(diary.date),
+                                  style: const TextStyle(
+                                      fontSize: 10.0, height: 1.5),
                                 ),
                                 Text(
                                   '${'${diary.date.hour}'.padLeft(2, '0')}:${'${diary.date.minute}'.padLeft(2, '0')}',
@@ -185,25 +221,14 @@ class DiaryListItem extends StatelessWidget {
                       ),
                     )))));
   }
+}
 
-  String _getWeekday(int weekday) {
-    switch (weekday) {
-      case 1:
-        return '一';
-      case 2:
-        return '二';
-      case 3:
-        return '三';
-      case 4:
-        return '四';
-      case 5:
-        return '五';
-      case 6:
-        return '六';
-      case 7:
-        return '日';
-      default:
-        return '';
-    }
-  }
+class _DiaryListViewSection {
+  late String header;
+  late List<Diary> items;
+
+  _DiaryListViewSection({
+    required this.header,
+    required this.items,
+  });
 }

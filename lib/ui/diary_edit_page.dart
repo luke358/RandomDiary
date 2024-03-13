@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:intl/intl.dart';
 import 'package:random_note/db/diary_repository.dart';
 import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
+import 'package:random_note/widgets/date_time_picker_sheet.dart';
+import 'package:unicons/unicons.dart';
 
 class DiaryEditPage extends StatefulWidget {
   final Diary? initialDiary; // 可选的参数
@@ -20,9 +23,11 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
 
   final DiaryRepository diaryRepository = DiaryRepository();
 
+  late DateTime selectedDate = DateTime.now();
   @override
   void initState() {
     super.initState();
+    selectedDate = widget.initialDiary?.date ?? DateTime.now();
     // 初始化 QuillController
     _controller = widget.initialDiary != null
         ? QuillController(
@@ -33,11 +38,37 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
         : QuillController.basic();
   }
 
+  void onDateChange(DateTime date) {
+    selectedDate = date;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Diary'),
+        title: SizedBox(
+          width: 150,
+          child: InkWell(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  DateFormat('yyyy/MM/dd HH:mm').format(selectedDate),
+                  style: const TextStyle(fontSize: 14, height: 2.5),
+                ),
+                const Icon(UniconsLine.angle_up),
+              ],
+            ),
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return const DateTimePickerSheet();
+                },
+              );
+            },
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -47,14 +78,15 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
                   jsonEncode(_controller.document.toDelta().toJson());
 
               final Diary newDiary =
-                  Diary(content: content, date: DateTime.now());
+                  Diary(content: content, date: selectedDate);
               if (widget.initialDiary != null) {
                 newDiary.id = widget.initialDiary!.id;
                 await diaryService.updateDiary(newDiary);
               } else {
                 await diaryService.insertDiary(newDiary);
               }
-              Navigator.pop(context, newDiary);
+              // ignore: use_build_context_synchronously
+              if (mounted) Navigator.pop(context, newDiary);
             },
           ),
         ],
