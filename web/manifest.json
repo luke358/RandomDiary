@@ -1,6 +1,6 @@
 {
-    "name": "flutter_test1",
-    "short_name": "flutter_test1",
+    "name": "RandomDiary",
+    "short_name": "RandomDiary",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

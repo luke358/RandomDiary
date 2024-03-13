@@ -1,4 +1,4 @@
-# flutter_test1
+# RandomDiary
 
 A new Flutter project.
 
