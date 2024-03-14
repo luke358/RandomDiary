@@ -6,35 +6,40 @@ on:
   push:
     tags:
       - v*
-    
+
 jobs:
   build:
-    # This job will run on ubuntu virtual machine
     runs-on: ubuntu-latest
     steps:
-    
-    # Setup Java environment in order to build the Android app.
-    - uses: actions/checkout@v1
-      with:
-    # 使用office分支的代码
-        path: main
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '12.x'
-    
-    # Setup the flutter environment.
-    - uses: subosito/flutter-action@v1
-      with:
-        channel: 'stable' # 'dev', 'alpha', default to: 'stable'
-        # flutter-version: '1.12.x' # you can also specify exact version of flutter
-    
-    # Get flutter dependencies.
-    - run: flutter pub get    
-    # Build apk
-    - run: flutter build apk --target-platform android-arm
-    # 发包
-    - name: Release apk
-      uses: ncipollo/release-action@v1.5.0
-      with:
-        artifacts: "build/app/outputs/apk/release/*.apk"
-        token: $
+      # 设置Android环境
+      - name: Set up Android SDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '12.x' # 设置Java版本
+      - name: Install Android SDK components
+        run: |
+          mkdir -p ~/android-sdk
+          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-6609375_latest.zip" -O android-sdk.zip
+          unzip -q android-sdk.zip -d ~/android-sdk
+          yes | ~/android-sdk/tools/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "platforms;android-31" "build-tools;31.0.0" "extras;google;m2repository" "extras;android;m2repository"
+      
+      # 配置Flutter环境
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      
+      # 获取Flutter依赖项
+      - name: Get dependencies
+        run: flutter pub get
+      
+      # 构建APK
+      - name: Build APK
+        run: flutter build apk --release --target-platform android-arm64
+      
+      # 发布APK
+      - name: Release APK
+        uses: ncipollo/release-action@v1.5.0
+        with:
+          artifacts: "build/app/outputs/apk/release/*.apk"
+          token: ${{ secrets.GITHUB_TOKEN }}
