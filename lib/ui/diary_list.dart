@@ -162,12 +162,15 @@ class DiaryListItem extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DiaryDetailPage(diary: diary),
-                    ),
-                  );
+                  Future.delayed(const Duration(milliseconds: 50), () {
+                    // 在延迟后执行点击事件
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DiaryDetailPage(diary: diary),
+                      ),
+                    );
+                  });
                 },
                 child: Ink(
                     color: Colors.white,
