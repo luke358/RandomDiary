@@ -4,7 +4,7 @@ import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
 import 'package:random_note/ui/diary_edit_page.dart';
-import 'package:random_note/widgets/loading.dart';
+// import 'package:random_note/widgets/loading.dart';
 import 'package:unicons/unicons.dart';
 import 'package:collection/collection.dart';
 
@@ -46,7 +46,12 @@ class _DiaryListState extends State<DiaryList> {
       case ConnectionState.none:
         return const Center(child: Icon(UniconsLine.data_sharing));
       case ConnectionState.waiting:
-        return const Loading();
+        return const Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Text('加载中...')],
+          ),
+        );
       case ConnectionState.active:
         final diaries = snapshot.data!;
         final sections = groupBy(diaries, (diary) => diary.getYearMonth());
