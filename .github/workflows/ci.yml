@@ -26,6 +26,11 @@ jobs:
       with:
         flutter-version: '3.x'
         channel: 'stable'
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v2
+      with:
+        sdk-version: '29'  # Specify the Android SDK version here
+        ndk-version: '21.4.7075529'
 
     - name: Get dependencies
       run: flutter pub get
