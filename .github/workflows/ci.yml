@@ -1,58 +1,40 @@
-name: CI
+name: Flutter CI
+
+# 创建触发打包条件：只要推送tag，就会触发版本打包
 
 on:
   push:
-    branches:
-      - master
-    paths-ignore:
-      - '.idea/**'
-      - '.gitattributes'
-      - '.github/**.json'
-      - '.gitignore'
-      - '.gitmodules'
-      - '**.md'
-      - '**/*.txt'
-      - '**/*.png'
-      - '**/*.jpg'
-      - 'LICENSE'
-      - 'NOTICE'
-  pull_request:
-    paths-ignore:
-      - '.idea/**'
-      - '.gitattributes'
-      - '.github/**.json'
-      - '.gitignore'
-      - '.gitmodules'
-      - '**.md'
-      - '**/*.txt'
-      - '**/*.png'
-      - '**/*.jpg'
-      - 'LICENSE'
-      - 'NOTICE'
-
+    tags:
+      - v*
+    
 jobs:
-  publish:
-    name: Publish to MavenLocal
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: 17
-      - uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishToMavenLocal
-
   build:
-    name: Build
+    # This job will run on ubuntu virtual machine
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: 17
-      - uses: gradle/gradle-build-action@v2
-        with:
-          arguments: app:assembleDebug
+    
+    # Setup Java environment in order to build the Android app.
+    - uses: actions/checkout@v1
+      with:
+    # 使用office分支的代码
+        path: main
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '12.x'
+    
+    # Setup the flutter environment.
+    - uses: subosito/flutter-action@v1
+      with:
+        channel: 'stable' # 'dev', 'alpha', default to: 'stable'
+        # flutter-version: '1.12.x' # you can also specify exact version of flutter
+    
+    # Get flutter dependencies.
+    - run: flutter pub get    
+    # Build apk
+    - run: flutter build apk --target-platform android-arm
+    # 发包
+    - name: Release apk
+      uses: ncipollo/release-action@v1.5.0
+      with:
+        artifacts: "build/app/outputs/apk/release/*.apk"
+        token: $
