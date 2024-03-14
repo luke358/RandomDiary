@@ -10,36 +10,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      # 设置Android环境
-      - name: Set up Android SDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: '12.x' # 设置Java版本
-      - name: Install Android SDK components
-        run: |
-          mkdir -p ~/android-sdk
-          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-6609375_latest.zip" -O android-sdk.zip
-          unzip -q android-sdk.zip -d ~/android-sdk
-          yes | ~/android-sdk/tools/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "platforms;android-31" "build-tools;31.0.0" "extras;google;m2repository" "extras;android;m2repository"
-      
-      # 配置Flutter环境
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v1
-        with:
-          channel: 'stable'
-      
-      # 获取Flutter依赖项
-      - name: Get dependencies
-        run: flutter pub get
-      
-      # 构建APK
-      - name: Build APK
-        run: flutter build apk --release --target-platform android-arm64
-      
-      # 发布APK
-      - name: Release APK
-        uses: ncipollo/release-action@v1.5.0
-        with:
-          artifacts: "build/app/outputs/apk/release/*.apk"
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Java JDK
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.x'
+        channel: 'stable'
+
+    - name: Get dependencies
+      run: flutter pub get
+
+    - name: Build APK
+      run: flutter build apk
+
+    - name: Archive production APK
+      uses: actions/upload-artifact@v2
+      with:
+        name: app-release
+        path: build/app/outputs/flutter-apk/app-release.apk
