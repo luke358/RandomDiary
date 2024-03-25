@@ -3,6 +3,8 @@
 import 'dart:convert';
 
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:intl/intl.dart';
+import 'package:random_note/common/datetime_helpers.dart';
 
 class Diary {
   int? id; // 日记的唯一标识符
@@ -30,7 +32,7 @@ class Diary {
   }
 
   String getYearMonth() {
-    return '${date.year}-${date.month}';
+    return '${DatetimeStringify(date).yearString}年 ${DateFormat('MMMM', 'zh_CN').format(date)}'; // 获取月份并格式化为中文
   }
 
   // 从Map中构建日记对象

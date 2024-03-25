@@ -4,7 +4,6 @@ import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
 import 'package:random_note/ui/diary_edit_page.dart';
-// import 'package:random_note/widgets/loading.dart';
 import 'package:unicons/unicons.dart';
 import 'package:collection/collection.dart';
 
@@ -70,6 +69,23 @@ class _DiaryListState extends State<DiaryList> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                index == 0
+                    ? Container(
+                        height: 228,
+                        padding: const EdgeInsets.only(top: 20.0),
+                        width: double.infinity,
+                        color: Colors.white,
+                        child: Column(
+                          children: [
+                            Text(
+                              DateTime.now().day.toString().padLeft(2, '0'),
+                              style: TextStyle(fontSize: 50),
+                            ),
+                            Text('三月 ｜ 周五'),
+                            Text('一段经典的名言，一段静单的名言。。。。。。。')
+                          ],
+                        ))
+                    : Container(),
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -77,9 +93,8 @@ class _DiaryListState extends State<DiaryList> {
                       '◆ ${section.header} ◆',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
                         fontSize: 12,
-                        color: Color.fromARGB(255, 191, 191, 191),
+                        color: Color.fromARGB(255, 169, 169, 169),
                       ),
                     ),
                   ),
@@ -105,38 +120,43 @@ class _DiaryListState extends State<DiaryList> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: SafeArea(
-            child: Scaffold(
-                backgroundColor: Colors.grey[200], // 设置背景为灰色
-                appBar: AppBar(
-                  toolbarHeight: 40,
-                  backgroundColor: Colors.transparent,
-                  elevation: 0, // 去掉阴影效果
-                  title: const Text(
-                    '二零二四年 三月',
-                    style: TextStyle(fontSize: 14.0),
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () async {
-                        toAddDiaryPage();
-                      },
-                    ),
-                  ],
-                ),
-                body: StreamBuilder(
-                  stream: diaryService.diaryStream,
-                  builder: _getBodyBySnapshotState,
-                ))));
+    return SafeArea(
+        child: Scaffold(
+      backgroundColor: const Color(0xf7f7f7f7),
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          StreamBuilder(
+            stream: diaryService.diaryStream,
+            builder: _getBodyBySnapshotState,
+          ),
+          Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () async {
+                      toAddDiaryPage();
+                    },
+                  )
+                ],
+              )),
+        ],
+      ),
+    ));
   }
 }
 
 class DiaryListItem extends StatelessWidget {
   final Diary diary;
 
-  const DiaryListItem({required this.diary});
+  const DiaryListItem({super.key, required this.diary});
 
   Future<bool> confirmDismiss(String text) async {
     return false;
@@ -175,13 +195,14 @@ class DiaryListItem extends StatelessWidget {
                 child: Ink(
                     color: Colors.white,
                     child: Container(
-                      padding:
-                          EdgeInsets.only(top: 12.0, right: 20.0, bottom: 13.0),
+                      height: 98,
+                      padding: const EdgeInsets.only(
+                          top: 12.0, right: 20.0, bottom: 12.0),
                       child: Row(
                         children: [
                           // 左边布局
                           Container(
-                            margin: EdgeInsets.only(right: 15.0),
+                            margin: const EdgeInsets.only(right: 15.0),
                             decoration: BoxDecoration(
                                 border: Border(
                                     right: BorderSide(
@@ -190,22 +211,28 @@ class DiaryListItem extends StatelessWidget {
                             width: 55.0,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   '${diary.date.day}'.padLeft(2, '0'),
                                   style: const TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: 18.0,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   DateFormat('EEE', "zh_CN").format(diary.date),
                                   style: const TextStyle(
-                                      fontSize: 10.0, height: 1.5),
+                                      fontSize: 12.0,
+                                      height: 1.5,
+                                      color:
+                                          Color.fromARGB(255, 113, 113, 113)),
                                 ),
                                 Text(
-                                  '${'${diary.date.hour}'.padLeft(2, '0')}:${'${diary.date.minute}'.padLeft(2, '0')}',
-                                  style: const TextStyle(fontSize: 8.0),
-                                ),
+                                    '${'${diary.date.hour}'.padLeft(2, '0')}:${'${diary.date.minute}'.padLeft(2, '0')}',
+                                    style: const TextStyle(
+                                        fontSize: 10.0,
+                                        color:
+                                            Color.fromARGB(255, 168, 168, 168)))
                               ],
                             ),
                           ),
@@ -214,12 +241,15 @@ class DiaryListItem extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  // _truncateContent(diary.plainText),
-                                  diary.plainText,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                Container(
+                                  padding: EdgeInsets.only(top: 7, bottom: 7),
+                                  child: Text(
+                                    // _truncateContent(diary.plainText),
+                                    diary.plainText,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                )
                               ],
                             ),
                           ),
