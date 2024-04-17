@@ -245,6 +245,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  grouped_list:
+    dependency: "direct main"
+    description:
+      name: grouped_list
+      sha256: fef106470186081c32636aa055492eee7fc7fe8bf0921a48d31ded24821af19f
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "5.1.2"
   html:
     dependency: transitive
     description:

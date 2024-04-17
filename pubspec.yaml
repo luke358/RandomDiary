@@ -36,6 +36,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   sqflite: ^2.3.2
+  grouped_list: ^5.1.2
   # fix quill need 0.18.1
   intl: ^0.18.1
   flutter_quill: ^9.3.1
