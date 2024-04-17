@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:random_note/widgets/scroll_picker.dart';
 
@@ -166,46 +168,45 @@ class _DateTimePickerSheetState extends State<DateTimePickerSheet>
   }
 
   Widget _buildCurrentTime() {
-    return SizedBox(
-        height: 50,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 20.0),
         child: Stack(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Text(
-                        DateFormat('yyyy/MM/dd HH:mm').format(selectedDate)),
+            SizedBox(
+                width: double.infinity,
+                child: Center(
+                  child: Text(
+                    DateFormat(
+                      'yyyy/MM/dd HH:mm',
+                    ).format(selectedDate),
                   ),
-                ),
-              ],
-            ),
-            // Positioned(
-            //     right: 10,
-            //     top: 11,
-            //     child: SizedBox(
-            //         width: 80,
-            //         height: 28,
-            //         child: OutlinedButton(
-            //           style: OutlinedButton.styleFrom(
-            //             padding: const EdgeInsets.all(0),
-            //             shape: RoundedRectangleBorder(
-            //               side: const BorderSide(color: Colors.blue),
-            //               borderRadius: BorderRadius.circular(5.0),
-            //             ),
-            //           ),
-            //           onPressed: () {
-            //             setState(() {
-            //               // selectedDate = DateTime.now();
-            //               // dayIndex = selectedDate.day;
-            //               // monthIndex = selectedDate.month;
-            //               // yearIndex = selectedDate.year;
-            //               // hourIndex = selectedDate.hour;
-            //               // minuteIndex = selectedDate.minute;
-            //             });
-            //           },
-            //           child: const Text("当前时间"),
-            //         ))),
+                )),
+            Positioned(
+                right: 20,
+                top: 0,
+                child: SizedBox(
+                    width: 60,
+                    height: 20,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(color: Colors.blue),
+                          borderRadius: BorderRadius.circular(3.0),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          // selectedDate = DateTime.now();
+                          // dayIndex = selectedDate.day;
+                          // monthIndex = selectedDate.month;
+                          // yearIndex = selectedDate.year;
+                          // hourIndex = selectedDate.hour;
+                          // minuteIndex = selectedDate.minute;
+                        });
+                      },
+                      child: const Text("当前时间", style: TextStyle(fontSize: 12.0),),
+                    ))),
           ],
         ));
   }
@@ -244,10 +245,159 @@ class _DateTimePickerSheetState extends State<DateTimePickerSheet>
     });
   }
 
+  Widget _buildTimeTab() {
+    return Column(
+      children: [
+        _buildCurrentTime(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox(
+              width: double.maxFinite,
+              height: 150,
+              child: Stack(
+                alignment: AlignmentDirectional.center,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width - 32,
+                    height: itemExtent - 8,
+                    decoration: BoxDecoration(
+                      color: const Color(0xEDEDEDED),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    top: 0,
+                    bottom: 0,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Expanded(
+                            child: ScrollPicker(
+                          list: hourType,
+                          type: '',
+                          index: hourTypeIndex,
+                          onSelected: (index) => onSelected(index, 'hourType'),
+                        )),
+                        Expanded(
+                            child: ScrollPicker(
+                          list: hourList,
+                          type: '',
+                          index: hourIndex,
+                          onSelected: (index) => onSelected(index, 'hour'),
+                        )),
+                        Expanded(
+                            child: ScrollPicker(
+                          list: minuteList,
+                          type: '',
+                          index: minuteIndex,
+                          onSelected: (index) => onSelected(index, 'minute'),
+                        )),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _buildDateTab() {
+    return Column(
+      children: [
+        _buildCurrentTime(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox(
+              width: double.maxFinite,
+              height: 150,
+              child: Stack(
+                alignment: AlignmentDirectional.center,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width - 32,
+                    height: itemExtent - 8,
+                    decoration: BoxDecoration(
+                      color: const Color(0xEDEDEDED),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    top: 0,
+                    bottom: 0,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Expanded(
+                            flex: 1,
+                            child: ScrollPicker(
+                              list: yearList,
+                              type: '年',
+                              index: yearIndex,
+                              onSelected: (index) => onSelected(index, 'year'),
+                            )),
+                        Expanded(
+                            flex: 1,
+                            child: ScrollPicker(
+                              list: monthList,
+                              type: '月',
+                              index: monthIndex,
+                              onSelected: (index) => onSelected(index, 'month'),
+                            )),
+                        Expanded(
+                            flex: 1,
+                            child: ScrollPicker(
+                              list: dayList,
+                              type: '日',
+                              index: dayIndex,
+                              onSelected: (index) => onSelected(index, 'day'),
+                            )),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _buildTabView() {
+    return Expanded(
+        flex: 1,
+        child: Container(
+          color: Colors.white,
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              // Date Tab
+              _buildDateTab(),
+              // Time Tab
+              _buildTimeTab()
+            ],
+          ),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
         height: 340,
+        color: Colors.white,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -258,147 +408,7 @@ class _DateTimePickerSheetState extends State<DateTimePickerSheet>
                 Tab(text: '时间'),
               ],
             ),
-            Expanded(
-                child: Container(
-              color: Colors.white,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Date Tab
-                  Column(
-                    children: [
-                      _buildCurrentTime(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          SizedBox(
-                            width: double.maxFinite,
-                            height: 200,
-                            child: Stack(
-                              alignment: AlignmentDirectional.center,
-                              children: [
-                                Container(
-                                  width: MediaQuery.of(context).size.width - 32,
-                                  height: itemExtent - 8,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xEDEDEDED),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                ),
-                                Positioned(
-                                  left: 20,
-                                  right: 20,
-                                  top: 0,
-                                  bottom: 0,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Expanded(
-                                          child: ScrollPicker(
-                                        list: yearList,
-                                        type: '年',
-                                        index: yearIndex,
-                                        onSelected: (index) =>
-                                            onSelected(index, 'year'),
-                                      )),
-                                      Expanded(
-                                          child: ScrollPicker(
-                                        list: monthList,
-                                        type: '月',
-                                        index: monthIndex,
-                                        onSelected: (index) =>
-                                            onSelected(index, 'month'),
-                                      )),
-                                      Expanded(
-                                          child: ScrollPicker(
-                                        list: dayList,
-                                        type: '日',
-                                        index: dayIndex,
-                                        onSelected: (index) =>
-                                            onSelected(index, 'day'),
-                                      )),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                              height: MediaQuery.of(context).padding.bottom),
-                        ],
-                      )
-                    ],
-                  ),
-                  // Time Tab
-                  Column(
-                    children: [
-                      _buildCurrentTime(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          SizedBox(
-                            width: double.maxFinite,
-                            height: 200,
-                            child: Stack(
-                              alignment: AlignmentDirectional.center,
-                              children: [
-                                Container(
-                                  width: MediaQuery.of(context).size.width - 32,
-                                  height: itemExtent - 8,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xEDEDEDED),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                ),
-                                Positioned(
-                                  left: 20,
-                                  right: 20,
-                                  top: 0,
-                                  bottom: 0,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Expanded(
-                                          child: ScrollPicker(
-                                        list: hourType,
-                                        type: '',
-                                        index: hourTypeIndex,
-                                        onSelected: (index) =>
-                                            onSelected(index, 'hourType'),
-                                      )),
-                                      Expanded(
-                                          child: ScrollPicker(
-                                        list: hourList,
-                                        type: '',
-                                        index: hourIndex,
-                                        onSelected: (index) =>
-                                            onSelected(index, 'hour'),
-                                      )),
-                                      Expanded(
-                                          child: ScrollPicker(
-                                        list: minuteList,
-                                        type: '',
-                                        index: minuteIndex,
-                                        onSelected: (index) =>
-                                            onSelected(index, 'minute'),
-                                      )),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                              height: MediaQuery.of(context).padding.bottom),
-                        ],
-                      )
-                    ],
-                  ),
-                ],
-              ),
-            )),
+            _buildTabView(),
           ],
         ));
   }

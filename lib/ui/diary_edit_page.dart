@@ -43,6 +43,13 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

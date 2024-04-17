@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:random_note/main.dart';
@@ -35,6 +36,41 @@ class _DiaryListState extends State<DiaryList> {
     );
   }
 
+  Widget _buildListHeader() {
+    return Container(
+        height: 228,
+        padding: const EdgeInsets.only(top: 20.0),
+        margin: const EdgeInsets.only(bottom: 8.0),
+        width: double.infinity,
+        color: Colors.white,
+        child: Column(
+          children: [
+            Text(
+              DateTime.now().day.toString().padLeft(2, '0'),
+              style: const TextStyle(fontSize: 50),
+            ),
+            const Text('三月 ｜ 周五'),
+            const Text('一段经典的名言，一段静单的名言。。。。。。。')
+          ],
+        ));
+  }
+
+  Widget _buildListGroupHeader(Diary diary) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Text(
+          '◆ ${diary.getYearMonth()} ◆',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color.fromARGB(255, 169, 169, 169),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _getBodyBySnapshotState(
     BuildContext context,
     AsyncSnapshot<List<Diary>> snapshot,
@@ -55,34 +91,29 @@ class _DiaryListState extends State<DiaryList> {
       case ConnectionState.active:
         final diaries = snapshot.data!;
         // final sections = groupBy(diaries, (diary) => diary.getYearMonth());
-        // print(sections);
+
         return GroupedListView<Diary, String>(
-            elements: diaries,
-            groupBy: (element) => element.getYearMonth(),
-            groupSeparatorBuilder: (String title) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      '◆ $title ◆',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color.fromARGB(255, 169, 169, 169),
-                      ),
-                    ),
-                  ),
-                ),
-            itemBuilder: (context, Diary element) => Container(
-                  margin: const EdgeInsets.only(
-                      bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
-                  color: Colors.white, // 设置日记项的背景为白色
-                  child: DiaryListItem(diary: element),
-                )
-            // itemComparator: (item1, item2) =>
-            //     item1['name'].compareTo(item2['name']), // optional
-            // order: GroupedListOrder.ASC, // optional
-            //  footer: Text("Widget at the bottom of list"), // optional
+          elements: diaries,
+          groupBy: (element) => element.group(),
+          groupHeaderBuilder: (Diary ele) {
+            if (ele == diaries[0]) {
+              return Column(
+                  children: [_buildListHeader(), _buildListGroupHeader(ele)]);
+            }
+            return _buildListGroupHeader(ele);
+          },
+          indexedItemBuilder: (context, Diary element, int index) {
+            return Container(
+              margin: const EdgeInsets.only(
+                  bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
+              color: Colors.white, // 设置日记项的背景为白色
+              child: DiaryListItem(diary: element),
             );
+          },
+          itemComparator: (item1, item2) =>
+              item1.date.compareTo(item2.date), // optional
+          order: GroupedListOrder.DESC, // optional
+        );
 
       // final formattedSections = sections.entries.map((entry) {
       //   final header = entry.key;
@@ -153,35 +184,37 @@ class _DiaryListState extends State<DiaryList> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+        bottom: true,
         child: Scaffold(
-      backgroundColor: const Color(0xf7f7f7f7),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          StreamBuilder(
-            stream: diaryService.diaryStream,
-            builder: _getBodyBySnapshotState,
+          resizeToAvoidBottomInset: false,
+          backgroundColor: const Color(0xf7f7f7f7),
+          extendBodyBehindAppBar: true,
+          body: Stack(
+            children: [
+              StreamBuilder(
+                stream: diaryService.diaryStream,
+                builder: _getBodyBySnapshotState,
+              ),
+              Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 40,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                          toAddDiaryPage();
+                        },
+                      )
+                    ],
+                  )),
+            ],
           ),
-          Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 40,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () async {
-                      toAddDiaryPage();
-                    },
-                  )
-                ],
-              )),
-        ],
-      ),
-    ));
+        ));
   }
 }
 

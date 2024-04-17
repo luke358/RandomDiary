@@ -89,8 +89,10 @@ class DatabaseHelper {
 
   Future<List<Diary>> getAllDiaries() async {
     final Database db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query('diary', orderBy: 'date DESC');
+    final List<Map<String, dynamic>> maps =
+        await db.query('diary', orderBy: 'date DESC');
     return List.generate(maps.length, (i) {
+      print(Diary.fromMap(maps[i]).date);
       return Diary.fromMap(maps[i]);
     });
   }

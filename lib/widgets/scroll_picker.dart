@@ -64,6 +64,7 @@ class _ScrollPickerState extends State<ScrollPicker> {
     return buildPickerBorder(
       child: CupertinoPicker(
         scrollController: scrollController,
+        diameterRatio: 99999999,
         looping: false,
         selectionOverlay: const Center(),
         onSelectedItemChanged: (index) {

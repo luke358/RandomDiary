@@ -35,6 +35,8 @@ class Diary {
     return '${DatetimeStringify(date).yearString}年 ${DateFormat('MMMM', 'zh_CN').format(date)}'; // 获取月份并格式化为中文
   }
 
+  String group() => '${date.year}${date.month}';
+
   // 从Map中构建日记对象
   factory Diary.fromMap(Map<String, dynamic> map) {
     return Diary(
