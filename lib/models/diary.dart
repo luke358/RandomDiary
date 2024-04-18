@@ -10,17 +10,21 @@ class Diary {
   int? id; // 日记的唯一标识符
   String content; // 日记内容
   DateTime date; // 日记日期
+  String mode; // 日期类型
   // List<Tag> tags; // 日记标签
 
   Diary({
     this.id,
     required this.content,
     required this.date,
+    this.mode = 'richtext',
   });
 
   Document get document => Document.fromJson(jsonDecode(content));
 
-  String get plainText => document.toPlainText().replaceAll(RegExp(r'\n'), '');
+  String get plainText => mode == 'richtext'
+      ? document.toPlainText().replaceAll(RegExp(r'\n'), '')
+      : content;
 
   // 将日记对象转换为Map以便存储到数据库
   Map<String, dynamic> toMap() {
