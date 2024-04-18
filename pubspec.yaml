@@ -46,6 +46,7 @@ dependencies:
   device_info_plus: ^9.1.2
   unicons: ^2.1.1
   collection: ^1.18.0
+  fluttertoast: ^8.2.4
 
 dev_dependencies:
   flutter_test:

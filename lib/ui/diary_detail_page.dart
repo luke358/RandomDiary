@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:random_note/common/datetime_helpers.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +21,7 @@ class DiaryDetailPage extends StatefulWidget {
 class _DiaryDetailPageState extends State<DiaryDetailPage> {
   late Diary diary;
   late final QuillController _controller;
+  late FToast fToast;
 
   void updateDiary(Diary newDiary) {
     diary = newDiary;
@@ -30,6 +33,10 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
   @override
   void initState() {
     super.initState();
+    fToast = FToast();
+    // if you want to use context from globally instead of content we need to pass navigatorKey.currentContext!
+    fToast.init(context);
+
     diary = widget.diary;
     _controller = QuillController(
         document: Document.fromJson(jsonDecode(diary.content)),
@@ -144,13 +151,34 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
                     },
                   ),
                   // TODO 分享
-                  // IconButton(
-                  //   icon: Icon(Icons.share),
-                  //   onPressed: () {
-                  //     // 分享按钮的操作
-                  //     // 这里可以添加分享逻辑
-                  //   },
-                  // ),
+                  IconButton(
+                    icon: const Icon(Icons.share),
+                    onPressed: () {
+                      // 分享按钮的操作
+                      // 这里可以添加分享逻辑
+
+                      fToast.showToast(
+                        child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 12.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25.0),
+                              color: Colors.greenAccent,
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Icon(Icons.warning_amber_outlined),
+                                SizedBox(
+                                  width: 12.0,
+                                ),
+                                Text("敬请期待～"),
+                              ],
+                            )),
+                        gravity: ToastGravity.TOP, // 设置显示位置R
+                      );
+                    },
+                  ),
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
@@ -159,7 +187,7 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
                       // 跳转到编辑页面
                       final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(
+                        CupertinoPageRoute(
                             builder: (context) => DiaryEditPage(
                                   initialDiary: diary,
                                 )),
