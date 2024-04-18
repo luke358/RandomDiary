@@ -22,13 +22,13 @@ class MyApp extends StatelessWidget {
     final DiaryRepository diaryRepository = DiaryRepository();
     // diaryRepository.clearDatabase();
 
-    return MaterialApp(
+    return const MaterialApp(
       title: '随心日记',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const DiaryList(),
+      // theme: ThemeData(
+      //   // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      //   useMaterial3: true,
+      // ),
+      home: DiaryList(),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,7 @@ import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
 import 'package:random_note/ui/diary_edit_page.dart';
+import 'package:random_note/ui/setting_drawer.dart';
 import 'package:unicons/unicons.dart';
 
 void main() {
@@ -23,6 +25,8 @@ class DiaryList extends StatefulWidget {
 }
 
 class _DiaryListState extends State<DiaryList> {
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -159,38 +163,49 @@ class _DiaryListState extends State<DiaryList> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        bottom: true,
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          backgroundColor: const Color(0xf6f7f9FF),
-          extendBodyBehindAppBar: true,
-          body: Stack(
-            children: [
-              StreamBuilder(
-                stream: diaryService.diaryStream,
-                builder: _getBodyBySnapshotState,
-              ),
-              Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 40,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () async {
-                          toAddDiaryPage();
-                        },
-                      )
-                    ],
-                  )),
-            ],
+    return Scaffold(
+      key: scaffoldKey,
+      appBar: AppBar(
+        toolbarHeight: 0,
+        backgroundColor: Colors.white,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light),
+      ),
+
+      resizeToAvoidBottomInset: false,
+      backgroundColor: const Color(0xf6f7f9FF),
+      drawer: const SettingDrawer(),
+      body: Stack(
+        children: [
+          StreamBuilder(
+            stream: diaryService.diaryStream,
+            builder: _getBodyBySnapshotState,
           ),
-        ));
+          Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => scaffoldKey.currentState?.openDrawer()),
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () async {
+                      toAddDiaryPage();
+                    },
+                  )
+                ],
+              )),
+        ],
+      ),
+    );
   }
 }
 
@@ -207,9 +222,9 @@ class DiaryListItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(right: 15.0),
       decoration: BoxDecoration(
-          border:
-              Border(right: BorderSide(color: Colors.grey.shade200, width: 1))),
-      width: 55.0,
+          border: Border(
+              right: BorderSide(color: Colors.grey.shade200, width: 0.7))),
+      width: 70.0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -222,7 +237,7 @@ class DiaryListItem extends StatelessWidget {
             DateFormat('EEE', "zh_CN").format(diary.date),
             style: const TextStyle(
                 fontSize: 12.0,
-                height: 1.5,
+                height: 2,
                 color: Color.fromARGB(255, 113, 113, 113)),
           ),
           Text(
