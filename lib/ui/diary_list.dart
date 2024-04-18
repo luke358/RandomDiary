@@ -58,8 +58,10 @@ class _DiaryListState extends State<DiaryList> {
                 )),
             Container(
               alignment: Alignment.center,
-              child: const Text('三月 ｜ 周五',
-                  textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
+              child: Text(
+                  '${DateFormat('MMMM', 'zh_CN').format(DateTime.now())} ｜ ${DateFormat('EEE', "zh_CN").format(DateTime.now())}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13)),
             ),
             const Divider(thickness: 0.5, height: 35),
             const Text('一段经典的名言，一段静单的名言。。。。。。。',
@@ -173,7 +175,6 @@ class _DiaryListState extends State<DiaryList> {
             statusBarIconBrightness: Brightness.dark,
             statusBarBrightness: Brightness.light),
       ),
-
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xf6f7f9FF),
       drawer: const SettingDrawer(),
