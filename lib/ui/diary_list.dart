@@ -38,19 +38,42 @@ class _DiaryListState extends State<DiaryList> {
 
   Widget _buildListHeader() {
     return Container(
-        height: 228,
-        padding: const EdgeInsets.only(top: 20.0),
+        height: 220,
+        padding: const EdgeInsets.only(top: 30.0, left: 50, right: 50),
         margin: const EdgeInsets.only(bottom: 8.0),
         width: double.infinity,
         color: Colors.white,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              DateTime.now().day.toString().padLeft(2, '0'),
-              style: const TextStyle(fontSize: 50),
+            Container(
+                alignment: Alignment.center,
+                child: Text(
+                  DateTime.now().day.toString().padLeft(2, '0'),
+                  style: const TextStyle(fontSize: 50),
+                )),
+            Container(
+              alignment: Alignment.center,
+              child: const Text('三月 ｜ 周五',
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
             ),
-            const Text('三月 ｜ 周五'),
-            const Text('一段经典的名言，一段静单的名言。。。。。。。')
+            const Divider(thickness: 0.5, height: 35),
+            const Text('一段经典的名言，一段静单的名言。。。。。。。',
+                textAlign: TextAlign.left, style: TextStyle(fontSize: 12)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  height: 0.1,
+                  width: 25,
+                  color: Colors.black45,
+                  margin: const EdgeInsets.only(right: 10),
+                ),
+                const Text('用户投稿',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontSize: 12, color: Colors.black45)),
+              ],
+            )
           ],
         ));
   }
@@ -69,6 +92,10 @@ class _DiaryListState extends State<DiaryList> {
         ),
       ),
     );
+  }
+
+  Future<void> _pullRefresh() async {
+    await Future.delayed(const Duration(seconds: 2));
   }
 
   Widget _getBodyBySnapshotState(
@@ -90,92 +117,41 @@ class _DiaryListState extends State<DiaryList> {
         );
       case ConnectionState.active:
         final diaries = snapshot.data!;
-        // final sections = groupBy(diaries, (diary) => diary.getYearMonth());
-
-        return GroupedListView<Diary, String>(
-          elements: diaries,
-          groupBy: (element) => element.group(),
-          groupHeaderBuilder: (Diary ele) {
-            if (ele == diaries[0]) {
-              return Column(
-                  children: [_buildListHeader(), _buildListGroupHeader(ele)]);
-            }
-            return _buildListGroupHeader(ele);
-          },
-          indexedItemBuilder: (context, Diary element, int index) {
-            return Container(
-              margin: const EdgeInsets.only(
-                  bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
-              color: Colors.white, // 设置日记项的背景为白色
-              child: DiaryListItem(diary: element),
-            );
-          },
-          itemComparator: (item1, item2) =>
-              item1.date.compareTo(item2.date), // optional
-          order: GroupedListOrder.DESC, // optional
-        );
-
-      // final formattedSections = sections.entries.map((entry) {
-      //   final header = entry.key;
-
-      //   return _DiaryListViewSection(
-      //     header: header,
-      //     items: entry.value.toList(),
-      //   );
-      // }).toList();
-      // return ListView.builder(
-      //   itemCount: formattedSections.length,
-      //   itemBuilder: (BuildContext context, int index) {
-      //     final section = formattedSections[index];
-      //     return Column(
-      //       crossAxisAlignment: CrossAxisAlignment.start,
-      //       children: [
-      //         index == 0
-      //             ? Container(
-      //                 height: 228,
-      //                 padding: const EdgeInsets.only(top: 20.0),
-      //                 width: double.infinity,
-      //                 color: Colors.white,
-      //                 child: Column(
-      //                   children: [
-      //                     Text(
-      //                       DateTime.now().day.toString().padLeft(2, '0'),
-      //                       style: TextStyle(fontSize: 50),
-      //                     ),
-      //                     Text('三月 ｜ 周五'),
-      //                     Text('一段经典的名言，一段静单的名言。。。。。。。')
-      //                   ],
-      //                 ))
-      //             : Container(),
-      //         Center(
-      //           child: Padding(
-      //             padding: const EdgeInsets.all(8.0),
-      //             child: Text(
-      //               '◆ ${section.header} ◆',
-      //               textAlign: TextAlign.center,
-      //               style: const TextStyle(
-      //                 fontSize: 12,
-      //                 color: Color.fromARGB(255, 169, 169, 169),
-      //               ),
-      //             ),
-      //           ),
-      //         ),
-      //         ListView.builder(
-      //           itemCount: section.items.length,
-      //           itemBuilder: (BuildContext context, int index) {
-      //             final sectionItem = section.items[index];
-      //             return Container(
-      //               margin: const EdgeInsets.only(
-      //                   bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
-      //               color: Colors.white, // 设置日记项的背景为白色
-      //               child: DiaryListItem(diary: sectionItem),
-      //             );
-      //           },
-      //         ),
-      //       ],
-      //     );
-      //   },
-      // );
+        if (diaries.isEmpty) {
+          return RefreshIndicator(
+              onRefresh: _pullRefresh,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [_buildListHeader(), const Text('空空如也～')],
+              ));
+        }
+        return RefreshIndicator(
+            onRefresh: _pullRefresh,
+            child: GroupedListView<Diary, String>(
+              elements: diaries,
+              physics: const AlwaysScrollableScrollPhysics(),
+              groupBy: (element) => element.group(),
+              groupHeaderBuilder: (Diary ele) {
+                if (ele == diaries[0]) {
+                  return Column(children: [
+                    _buildListHeader(),
+                    _buildListGroupHeader(ele)
+                  ]);
+                }
+                return _buildListGroupHeader(ele);
+              },
+              indexedItemBuilder: (context, Diary element, int index) {
+                return Container(
+                  margin: const EdgeInsets.only(
+                      bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
+                  color: Colors.white, // 设置日记项的背景为白色
+                  child: DiaryListItem(diary: element),
+                );
+              },
+              itemComparator: (item1, item2) =>
+                  item1.date.compareTo(item2.date), // optional
+              order: GroupedListOrder.DESC, // optional
+            ));
       case ConnectionState.done:
         return const Center(child: Text('Stream closed'));
     }
@@ -187,7 +163,7 @@ class _DiaryListState extends State<DiaryList> {
         bottom: true,
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          backgroundColor: const Color(0xf7f7f7f7),
+          backgroundColor: const Color(0xf6f7f9FF),
           extendBodyBehindAppBar: true,
           body: Stack(
             children: [
