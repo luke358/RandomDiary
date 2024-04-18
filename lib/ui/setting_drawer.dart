@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class SettingDrawer extends StatelessWidget {
   const SettingDrawer({
@@ -134,37 +132,45 @@ class SettingDrawer extends StatelessWidget {
     );
   }
 
+  Widget _buildFooterButton(Function onTap, IconData icon, String text) {
+    return InkWell(
+        borderRadius: BorderRadius.circular(50.0),
+        onTap: () {
+          onTap();
+        },
+        child: Container(
+          alignment: Alignment.center,
+          width: 100,
+          height: 100,
+          color: Colors.transparent, // 设置按钮颜色
+
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 30,
+              ),
+              const SizedBox(height: 8),
+              Text(text)
+            ],
+          ),
+        ));
+  }
+
   Widget _buildFooter() {
     return Stack(
       children: [
         Positioned(
             child: Container(
           alignment: Alignment.center,
-          height: 100,
-          padding: const EdgeInsets.only(left: 80, right: 80, bottom: 20),
-          child: const Row(
+          height: 150,
+          padding: const EdgeInsets.only(left: 40, right: 40, bottom: 0),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                children: [
-                  Icon(
-                    Icons.settings_outlined,
-                    size: 30,
-                  ),
-                  SizedBox(height: 8),
-                  Text('设置')
-                ],
-              ),
-              Column(
-                children: [
-                  Icon(
-                    Icons.light_mode_outlined,
-                    size: 30,
-                  ),
-                  SizedBox(height: 8),
-                  Text('夜间')
-                ],
-              ),
+              _buildFooterButton(() {}, Icons.home, '设置'),
+              _buildFooterButton(() {}, Icons.light_mode_outlined, '夜间'),
             ],
           ),
         ))

@@ -194,7 +194,7 @@ class _DiaryListState extends State<DiaryList> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
-                      icon: const Icon(Icons.edit),
+                      icon: const Icon(Icons.menu_sharp),
                       onPressed: () => scaffoldKey.currentState?.openDrawer()),
                   IconButton(
                     icon: const Icon(Icons.edit),
