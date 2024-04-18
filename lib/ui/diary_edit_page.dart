@@ -49,62 +49,63 @@ class _DiaryEditPageState extends State<DiaryEditPage> {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: SizedBox(
+        child: InkWell(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                DateFormat('yyyy/MM/dd HH:mm').format(selectedDate),
+                style: const TextStyle(fontSize: 14, height: 2.5),
+              ),
+              const Icon(UniconsLine.angle_up),
+            ],
+          ),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return DateTimePickerSheet(
+                  selectedDate: selectedDate,
+                  onSelected: (date) => {
+                    setState(() {
+                      selectedDate = date;
+                    })
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.save),
+          onPressed: () async {
+            // Save the diary content
+            String content =
+                jsonEncode(_controller.document.toDelta().toJson());
+            final Diary newDiary = Diary(content: content, date: selectedDate);
+            if (widget.initialDiary != null) {
+              newDiary.id = widget.initialDiary!.id;
+              await diaryService.updateDiary(newDiary);
+            } else {
+              await diaryService.insertDiary(newDiary);
+            }
+            // ignore: use_build_context_synchronously
+            if (mounted) Navigator.pop(context, newDiary);
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: SizedBox(
-          width: 150,
-          child: InkWell(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  DateFormat('yyyy/MM/dd HH:mm').format(selectedDate),
-                  style: const TextStyle(fontSize: 14, height: 2.5),
-                ),
-                const Icon(UniconsLine.angle_up),
-              ],
-            ),
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return DateTimePickerSheet(
-                    selectedDate: selectedDate,
-                    onSelected: (date) => {
-                      setState(() {
-                        selectedDate = date;
-                      })
-                    },
-                  );
-                },
-              );
-            },
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: () async {
-              // Save the diary content
-              String content =
-                  jsonEncode(_controller.document.toDelta().toJson());
-
-              final Diary newDiary =
-                  Diary(content: content, date: selectedDate);
-              if (widget.initialDiary != null) {
-                newDiary.id = widget.initialDiary!.id;
-                await diaryService.updateDiary(newDiary);
-              } else {
-                await diaryService.insertDiary(newDiary);
-              }
-              // ignore: use_build_context_synchronously
-              if (mounted) Navigator.pop(context, newDiary);
-            },
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: Column(
         children: [
           Expanded(
