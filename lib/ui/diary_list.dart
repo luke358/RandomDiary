@@ -1,13 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
-import 'package:random_note/ui/diary_edit_page.dart';
+import 'package:random_note/ui/diary_edit_page_text.dart';
 import 'package:random_note/ui/setting_drawer.dart';
 import 'package:unicons/unicons.dart';
 
@@ -36,7 +35,7 @@ class _DiaryListState extends State<DiaryList> {
     // 跳转到新增页面
     Navigator.push(
       context,
-      CupertinoPageRoute(builder: (context) => const DiaryEditPage()),
+      CupertinoPageRoute(builder: (context) => const DiaryEditTextPage()),
     );
   }
 

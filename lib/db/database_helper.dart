@@ -18,7 +18,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'diary_databaseV1.db');
+    String path = join(await getDatabasesPath(), 'diary_databaseV1.1.db');
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
@@ -26,7 +26,6 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE diary(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
         content TEXT,
         date TEXT,
         cate_id INTEGER,

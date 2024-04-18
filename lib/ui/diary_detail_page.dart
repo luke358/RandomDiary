@@ -2,13 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:random_note/common/datetime_helpers.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:intl/intl.dart';
-import 'package:random_note/ui/diary_edit_page.dart';
+import 'package:random_note/ui/diary_edit_page_text.dart';
 
 class DiaryDetailPage extends StatefulWidget {
   final Diary diary; // 可选的参数
@@ -39,9 +38,11 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
     fToast.init(context);
 
     diary = widget.diary;
-    _controller = QuillController(
-        document: Document.fromJson(jsonDecode(diary.content)),
-        selection: const TextSelection.collapsed(offset: 0));
+    if (diary.mode == 'richtext') {
+      _controller = QuillController(
+          document: Document.fromJson(jsonDecode(diary.content)),
+          selection: const TextSelection.collapsed(offset: 0));
+    }
   }
 
   Widget _buildHeaderLeft() {
@@ -132,7 +133,6 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
             onPressed: () {
               // 分享按钮的操作
               // 这里可以添加分享逻辑
-
               fToast.showToast(
                 child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -164,7 +164,7 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
               final result = await Navigator.push(
                 context,
                 CupertinoPageRoute(
-                    builder: (context) => DiaryEditPage(
+                    builder: (context) => DiaryEditTextPage(
                           initialDiary: diary,
                         )),
               );
@@ -197,14 +197,19 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
                   children: [
                     _buildHeader(),
                     const SizedBox(height: 20),
-                    QuillEditor.basic(
-                      configurations: QuillEditorConfigurations(
-                        controller: _controller,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        readOnly: true,
-                        showCursor: false,
-                      ),
-                    ),
+                    diary.mode == 'richtext'
+                        ? QuillEditor.basic(
+                            configurations: QuillEditorConfigurations(
+                              controller: _controller,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              readOnly: true,
+                              showCursor: false,
+                            ),
+                          )
+                        : Text(
+                            diary.content,
+                            style: const TextStyle(fontSize: 16),
+                          ),
                   ],
                 ),
               ),
