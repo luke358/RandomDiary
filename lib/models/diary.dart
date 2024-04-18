@@ -32,6 +32,7 @@ class Diary {
       'id': id,
       'content': content,
       'date': date.toIso8601String(),
+      'mode': mode,
     };
   }
 
@@ -43,12 +44,13 @@ class Diary {
 
   // 从Map中构建日记对象
   factory Diary.fromMap(Map<String, dynamic> map) {
+    print(map);
     return Diary(
-        id: map['id'],
-        content: map['content'],
-        date: DateTime.parse(map['date']),
-        mode: map['mode']
-        // tags: List<Tag>.from(map['tags'].map((tagMap) => Tag.fromMap(tagMap))), // 从Map列表构建标签List
-        );
+      id: map['id'],
+      content: map['content'],
+      date: DateTime.parse(map['date']),
+      mode: map['mode']
+      // tags: List<Tag>.from(map['tags'].map((tagMap) => Tag.fromMap(tagMap))), // 从Map列表构建标签List
+    );
   }
 }

@@ -18,7 +18,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'diary_database.db');
+    String path = join(await getDatabasesPath(), 'diary_databaseV1.db');
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
@@ -29,24 +29,25 @@ class DatabaseHelper {
         title TEXT,
         content TEXT,
         date TEXT,
-        tags TEXT
+        cate_id INTEGER,
+        mode TEXT
       )
     ''');
 
     await db.execute('''
-      CREATE TABLE tags(
+      CREATE TABLE category(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT
       )
     ''');
 
     await db.execute('''
-        CREATE TABLE diary_tags(
+        CREATE TABLE diary_category(
           diary_id INTEGER,
-          tag_id INTEGER,
+          cate_id INTEGER,
           FOREIGN KEY(diary_id) REFERENCES diary(id),
-          FOREIGN KEY(tag_id) REFERENCES tags(id),
-          PRIMARY KEY (diary_id, tag_id)
+          FOREIGN KEY(cate_id) REFERENCES category(id),
+          PRIMARY KEY (diary_id, cate_id)
         )
       ''');
   }
@@ -67,10 +68,8 @@ class DatabaseHelper {
     final Database db = await instance.database;
 
     // 插入日记
-    int diaryId = await db.insert('diary', {
-      'content': diary.content,
-      'date': diary.date.toIso8601String(),
-    });
+    int diaryId = await db.insert(
+        'diary', {...diary.toMap(), 'date': diary.date.toIso8601String()});
 
     // 返回日记的ID
     return diaryId;
