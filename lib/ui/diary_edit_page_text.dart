@@ -208,7 +208,7 @@ class _DiaryEditTextPageState extends State<DiaryEditTextPage>
           IconButton(
             onPressed: saveDiary,
             icon: Icon(
-              Icons.menu_book_outlined,
+              Icons.check,
               size: 28,
               color: toolbarActive == ToolbarState.pagerActive
                   ? Colors.blueAccent

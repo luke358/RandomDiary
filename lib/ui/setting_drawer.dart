@@ -169,7 +169,7 @@ class SettingDrawer extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildFooterButton(() {}, Icons.home, '设置'),
+              _buildFooterButton(() {}, Icons.settings_outlined, '设置'),
               _buildFooterButton(() {}, Icons.light_mode_outlined, '夜间'),
             ],
           ),
