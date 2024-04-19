@@ -23,11 +23,14 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
   late final QuillController _controller;
   late FToast fToast;
 
+  // TODO: 抽离出实体类，调用不同 mode 下实体类的更新方法
   void updateDiary(Diary newDiary) {
-    diary = newDiary;
-    _controller.document = Document.fromJson(
-      jsonDecode(diary.content),
-    );
+    setState(() {
+      diary = newDiary;
+    });
+    // _controller.document = Document.fromJson(
+    //   jsonDecode(diary.content),
+    // );
   }
 
   @override

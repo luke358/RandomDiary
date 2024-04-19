@@ -16,6 +16,7 @@ enum ToolbarState {
   textActive,
   imageActive,
   pagerActive,
+  finishActive
 }
 
 class DiaryEditTextPage extends StatefulWidget {
@@ -30,6 +31,7 @@ class DiaryEditTextPage extends StatefulWidget {
 class _DiaryEditTextPageState extends State<DiaryEditTextPage>
     with WidgetsBindingObserver {
   final DiaryRepository diaryRepository = DiaryRepository();
+  final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
   late DateTime selectedDate = DateTime.now();
@@ -43,6 +45,8 @@ class _DiaryEditTextPageState extends State<DiaryEditTextPage>
   void initState() {
     super.initState();
     selectedDate = widget.initialDiary?.date ?? DateTime.now();
+
+    _controller.text = widget.initialDiary?.content ?? '';
     var keyboardVisibilityController = KeyboardVisibilityController();
 
     // Subscribe
@@ -60,11 +64,26 @@ class _DiaryEditTextPageState extends State<DiaryEditTextPage>
   void dispose() {
     super.dispose();
     _focusNode.dispose();
+    _controller.dispose();
     keyboardSubscription.cancel();
   }
 
   void onDateChange(DateTime date) {
     selectedDate = date;
+  }
+
+  Future<void> saveDiary() async {
+    String content = _controller.text;
+    final Diary newDiary =
+        Diary(content: content, date: selectedDate, mode: 'text');
+    if (widget.initialDiary != null) {
+      newDiary.id = widget.initialDiary!.id;
+      await diaryService.updateDiary(newDiary);
+    } else {
+      await diaryService.insertDiary(newDiary);
+    }
+    // ignore: use_build_context_synchronously
+    if (mounted) Navigator.pop(context, newDiary);
   }
 
   AppBar _buildAppBar() {
@@ -109,22 +128,95 @@ class _DiaryEditTextPageState extends State<DiaryEditTextPage>
       actions: [
         IconButton(
           icon: const Icon(Icons.save),
-          onPressed: () async {
-            // Save the diary content
-            String content = '111';
-            final Diary newDiary =
-                Diary(content: content, date: selectedDate, mode: 'text');
-            if (widget.initialDiary != null) {
-              newDiary.id = widget.initialDiary!.id;
-              await diaryService.updateDiary(newDiary);
-            } else {
-              await diaryService.insertDiary(newDiary);
-            }
-            // ignore: use_build_context_synchronously
-            if (mounted) Navigator.pop(context, newDiary);
-          },
+          onPressed: saveDiary,
         ),
       ],
+    );
+  }
+
+  Widget _buildToolbar() {
+    return Container(
+      width: double.infinity,
+      height: 45,
+      decoration: BoxDecoration(
+          border: Border(
+              top: BorderSide(color: Colors.grey.shade200, width: 0.4),
+              bottom: BorderSide(color: Colors.grey.shade200, width: 0.4))),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Transform.rotate(
+            angle: toolbarActive == ToolbarState.keyboardHide ? pi : 0,
+            child: IconButton(
+                onPressed: () {
+                  if (toolbarActive == ToolbarState.keyboardActive) {
+                    setState(() {
+                      toolbarActive = ToolbarState.keyboardHide;
+                    });
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  } else {
+                    FocusScope.of(context).requestFocus(_focusNode);
+                    setState(() {
+                      toolbarActive = ToolbarState.keyboardActive;
+                    });
+                  }
+                },
+                icon: Icon(
+                  Icons.keyboard_hide_outlined,
+                  size: 28,
+                  color: toolbarActive == ToolbarState.keyboardActive
+                      ? Colors.blueAccent
+                      : null,
+                )),
+          ),
+          IconButton(
+              onPressed: () {
+                setState(() {
+                  toolbarActive = ToolbarState.textActive;
+                });
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              icon: Icon(
+                Icons.text_fields_outlined,
+                size: 28,
+                color: toolbarActive == ToolbarState.textActive
+                    ? Colors.blueAccent
+                    : null,
+              )),
+          IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.image_outlined,
+                size: 28,
+              )),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                toolbarActive = ToolbarState.pagerActive;
+              });
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            icon: Icon(
+              Icons.menu_book_outlined,
+              size: 28,
+              color: toolbarActive == ToolbarState.pagerActive
+                  ? Colors.blueAccent
+                  : null,
+            ),
+          ),
+          IconButton(
+            onPressed: saveDiary,
+            icon: Icon(
+              Icons.menu_book_outlined,
+              size: 28,
+              color: toolbarActive == ToolbarState.pagerActive
+                  ? Colors.blueAccent
+                  : null,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -146,6 +238,7 @@ class _DiaryEditTextPageState extends State<DiaryEditTextPage>
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
+                controller: _controller,
                 focusNode: _focusNode,
                 autofocus: true,
                 maxLines: null, // 设置为允许多行输入
@@ -155,80 +248,7 @@ class _DiaryEditTextPageState extends State<DiaryEditTextPage>
               ),
             ),
           ),
-          Container(
-            width: double.infinity,
-            height: 45,
-            decoration: BoxDecoration(
-                border: Border(
-                    top: BorderSide(color: Colors.grey.shade200, width: 0.4),
-                    bottom:
-                        BorderSide(color: Colors.grey.shade200, width: 0.4))),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Transform.rotate(
-                  angle: toolbarActive == ToolbarState.keyboardHide ? pi : 0,
-                  child: IconButton(
-                      onPressed: () {
-                        if (toolbarActive == ToolbarState.keyboardActive) {
-                          setState(() {
-                            toolbarActive = ToolbarState.keyboardHide;
-                          });
-                          FocusManager.instance.primaryFocus?.unfocus();
-                        } else {
-                          FocusScope.of(context).requestFocus(_focusNode);
-                          setState(() {
-                            toolbarActive = ToolbarState.keyboardActive;
-                          });
-                        }
-                      },
-                      icon: Icon(
-                        Icons.keyboard_hide_outlined,
-                        size: 28,
-                        color: toolbarActive == ToolbarState.keyboardActive
-                            ? Colors.blueAccent
-                            : null,
-                      )),
-                ),
-                IconButton(
-                    onPressed: () {
-                      setState(() {
-                        toolbarActive = ToolbarState.textActive;
-                      });
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    },
-                    icon: Icon(
-                      Icons.text_fields_outlined,
-                      size: 28,
-                      color: toolbarActive == ToolbarState.textActive
-                          ? Colors.blueAccent
-                          : null,
-                    )),
-                IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.image_outlined,
-                      size: 28,
-                    )),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      toolbarActive = ToolbarState.pagerActive;
-                    });
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  },
-                  icon: Icon(
-                    Icons.menu_book_outlined,
-                    size: 28,
-                    color: toolbarActive == ToolbarState.pagerActive
-                        ? Colors.blueAccent
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildToolbar(),
           Container(
             height:
                 toolbarActive == ToolbarState.keyboardHide ? 0 : keyboardHeight,
