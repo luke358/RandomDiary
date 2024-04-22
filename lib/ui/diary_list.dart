@@ -1,13 +1,15 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:grouped_list/grouped_list.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
 import 'package:random_note/ui/diary_detail_page.dart';
 import 'package:random_note/ui/diary_edit_page_text.dart';
 import 'package:random_note/ui/setting_drawer.dart';
+import 'package:sticky_and_expandable_list/sticky_and_expandable_list.dart';
 import 'package:unicons/unicons.dart';
 
 void main() {
@@ -24,11 +26,47 @@ class DiaryList extends StatefulWidget {
 }
 
 class _DiaryListState extends State<DiaryList> {
-  var scaffoldKey = GlobalKey<ScaffoldState>();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  final _controller = ExpandableListController();
+  late List<_DiaryListViewSection> _sections = [];
+
+  int stickySectionIndex = -1;
 
   @override
   void initState() {
     super.initState();
+
+    diaryService.diaryStream.listen((diaries) {
+      final sections = groupBy(diaries, (diary) => diary.getYearMonth())
+          .entries
+          .map((entry) {
+        final header = entry.key;
+        return _DiaryListViewSection(
+          header: header,
+          items: entry.value.toList(),
+        );
+      }).toList();
+      setState(() {
+        _sections = sections; // 将数据保存到变量中
+      });
+    });
+
+    _controller.addListener(() {
+      // print("switchingSectionIndex:${_controller.switchingSectionIndex}, stickySectionIndex:" +
+      //     "${_controller.stickySectionIndex},scrollPercent:${_controller.percent}");
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          stickySectionIndex = _controller.stickySectionIndex;
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
   void toAddDiaryPage() {
@@ -83,12 +121,12 @@ class _DiaryListState extends State<DiaryList> {
         ));
   }
 
-  Widget _buildListGroupHeader(Diary diary) {
+  Widget _buildListGroupHeader(String header) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
         child: Text(
-          '◆ ${diary.getYearMonth()} ◆',
+          '◆ $header ◆',
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 12,
@@ -112,51 +150,45 @@ class _DiaryListState extends State<DiaryList> {
     }
     switch (snapshot.connectionState) {
       case ConnectionState.none:
-        return const Center(child: Icon(UniconsLine.data_sharing));
+        return const SliverToBoxAdapter(
+          child: Center(child: Icon(UniconsLine.data_sharing)),
+        );
       case ConnectionState.waiting:
-        return const Center(
+        return const SliverToBoxAdapter(
+            child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [Text('加载中...')],
           ),
-        );
+        ));
       case ConnectionState.active:
         final diaries = snapshot.data!;
         if (diaries.isEmpty) {
-          return RefreshIndicator(
-              onRefresh: _pullRefresh,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [_buildListHeader(), const Text('空空如也～')],
-              ));
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [_buildListHeader(), const Text('空空如也～')],
+          );
         }
-        return RefreshIndicator(
-            onRefresh: _pullRefresh,
-            child: GroupedListView<Diary, String>(
-              elements: diaries,
-              physics: const AlwaysScrollableScrollPhysics(),
-              groupBy: (element) => element.group(),
-              groupHeaderBuilder: (Diary ele) {
-                if (ele == diaries[0]) {
-                  return Column(children: [
-                    _buildListHeader(),
-                    _buildListGroupHeader(ele)
-                  ]);
-                }
-                return _buildListGroupHeader(ele);
-              },
-              indexedItemBuilder: (context, Diary element, int index) {
-                return Container(
-                  margin: const EdgeInsets.only(
-                      bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
-                  color: Colors.white, // 设置日记项的背景为白色
-                  child: DiaryListItem(diary: element),
-                );
-              },
-              itemComparator: (item1, item2) =>
-                  item1.date.compareTo(item2.date), // optional
-              order: GroupedListOrder.DESC, // optional
-            ));
+        return SliverExpandableList(
+            builder:
+                SliverExpandableChildDelegate<Diary, _DiaryListViewSection>(
+          controller: _controller,
+          sectionList: _sections,
+          sticky: true,
+          headerBuilder: (context, sectionIndex, index) {
+            return _buildListGroupHeader(_sections[sectionIndex].header);
+          },
+          itemBuilder: (context, sectionIndex, itemIndex, index) {
+            return Container(
+              height: 98,
+              margin: const EdgeInsets.only(
+                  bottom: 8.0, left: 10.0, right: 10.0), // 设置底部间距
+              color: Colors.white, // 设置日记项的背景为白色
+              child: DiaryListItem(
+                  diary: _sections[sectionIndex].items[itemIndex]),
+            );
+          },
+        ));
       case ConnectionState.done:
         return const Center(child: Text('Stream closed'));
     }
@@ -165,47 +197,65 @@ class _DiaryListState extends State<DiaryList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        toolbarHeight: 0,
-        backgroundColor: Colors.white,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.dark,
-            statusBarBrightness: Brightness.light),
-      ),
-      resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xf6f7f9FF),
-      drawer: const SettingDrawer(),
-      body: Stack(
-        children: [
-          StreamBuilder(
-            stream: diaryService.diaryStream,
-            builder: _getBodyBySnapshotState,
-          ),
-          Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 40,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                      icon: const Icon(Icons.menu_sharp),
-                      onPressed: () => scaffoldKey.currentState?.openDrawer()),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () async {
-                      toAddDiaryPage();
-                    },
-                  )
+        key: scaffoldKey,
+        appBar: AppBar(
+          scrolledUnderElevation: 0,
+          toolbarHeight: 0,
+          backgroundColor: Colors.white,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.dark,
+              statusBarBrightness: Brightness.light),
+        ),
+        resizeToAvoidBottomInset: false,
+        backgroundColor: const Color(0xf6f7f9FF),
+        drawer: const SettingDrawer(),
+        body: Stack(
+          children: [
+            RefreshIndicator(
+              onRefresh: _pullRefresh,
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _buildListHeader(),
+                  ),
+                  StreamBuilder(
+                      stream: diaryService.diaryStream,
+                      builder: _getBodyBySnapshotState)
                 ],
-              )),
-        ],
-      ),
-    );
+              ),
+            ),
+            Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 40,
+                child: Container(
+                  color: stickySectionIndex == -1
+                      ? Colors.transparent
+                      : Colors.white,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.menu_sharp),
+                          onPressed: () =>
+                              scaffoldKey.currentState?.openDrawer()),
+                      stickySectionIndex > -1
+                          ? Text(_sections[stickySectionIndex].header)
+                          : Container(),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                          toAddDiaryPage();
+                        },
+                      )
+                    ],
+                  ),
+                )),
+          ],
+        ));
   }
 }
 
@@ -309,4 +359,23 @@ class DiaryListItem extends StatelessWidget {
                   ),
                 ))));
   }
+}
+
+class _DiaryListViewSection implements ExpandableListSection<Diary> {
+  late String header;
+  late List<Diary> items;
+
+  _DiaryListViewSection({
+    required this.header,
+    required this.items,
+  });
+
+  @override
+  List<Diary> getItems() => items;
+
+  @override
+  bool isSectionExpanded() => true;
+
+  @override
+  void setSectionExpanded(bool expanded) {}
 }
