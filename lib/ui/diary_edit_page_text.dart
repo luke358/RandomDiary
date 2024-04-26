@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:random_note/db/diary_repository.dart';
 import 'package:random_note/main.dart';
 import 'package:random_note/models/diary.dart';
+import 'package:random_note/ui/widgets/text_bar.dart';
 import 'package:random_note/widgets/date_time_picker_sheet.dart';
 import 'package:unicons/unicons.dart';
 
@@ -220,6 +221,57 @@ class _DiaryEditTextPageState extends State<DiaryEditTextPage>
     );
   }
 
+  //  Widget _buildTextBar() {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 10),
+  //     width: double.infinity,
+  //     child: const Column(
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Text('对齐'),
+  //             Icon(Icons.format_align_left_outlined),
+  //             Icon(Icons.format_align_center_outlined),
+  //             Icon(Icons.format_align_right_outlined)
+  //           ],
+  //         ),
+  //         Row(
+  //           children: [
+  //             Text('粗细'),
+  //             Icon(Icons.format_align_left_outlined),
+  //             Icon(Icons.format_align_center_outlined),
+  //             Icon(Icons.format_align_right_outlined)
+  //           ],
+  //         ),
+  //         Row(
+  //           children: [
+  //             Text('大小'),
+  //             Icon(Icons.format_align_left_outlined),
+  //             Icon(Icons.format_align_center_outlined),
+  //             Icon(Icons.format_align_right_outlined)
+  //           ],
+  //         ),
+  //         Row(
+  //           children: [
+  //             Text('颜色'),
+  //             Icon(Icons.format_align_left_outlined),
+  //             Icon(Icons.format_align_center_outlined),
+  //             Icon(Icons.format_align_right_outlined)
+  //           ],
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
+
+   final Map<ToolbarState, Widget> _toolbarItems = {
+    ToolbarState.keyboardActive: const SizedBox(),
+    ToolbarState.textActive: textBar(),
+    ToolbarState.imageActive: Icon(Icons.image_outlined),
+    ToolbarState.pagerActive: Icon(Icons.menu_book_outlined),
+    ToolbarState.finishActive: Icon(Icons.check),
+  };
+
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.of(context).viewInsets.bottom > 0) {
@@ -249,10 +301,11 @@ class _DiaryEditTextPageState extends State<DiaryEditTextPage>
             ),
           ),
           _buildToolbar(),
-          Container(
-            height:
-                toolbarActive == ToolbarState.keyboardHide ? 0 : keyboardHeight,
-          )
+          SizedBox(
+              height: toolbarActive == ToolbarState.keyboardHide
+                  ? 0
+                  : keyboardHeight,
+              child: _toolbarItems[toolbarActive] ?? const SizedBox())
         ],
       ),
     );
